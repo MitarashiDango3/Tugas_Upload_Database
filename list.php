@@ -33,6 +33,39 @@
 // 1. Check session for user authentication if not authenticated redirect to login.php
 // 2. If authenticated display the list of uploaded files in a table format with the following columns: File Name, Size, Date Uploaded, Actions (Download/Delete)
 // 3. makesure just show data from the logged in user
+
+session_start();
+
+if (!isset($_SESSION["user_id"])) {
+    header("Location: login.php");
+    exit();
+}
+
+$connect = mysqli_connect(
+    "localhost",
+    "root",
+    "",
+    "database_for_upload"
+);
+
+if (!$connect) {
+    die("Connection failed: " . mysqli_connect_error());
+}
+
+$user_id = $_SESSION["user_id"];
+
+$query = "SELECT * FROM files WHERE user_id = ? ORDER BY uploaded_at DESC";
+
+$statement = mysqli_prepare($connect, $query);
+
+mysqli_stmt_bind_param($statement, "i", $user_id);
+
+mysqli_stmt_execute($statement);
+
+$result = mysqli_stmt_get_result($statement);
+
+$file_count = mysqli_num_rows($result);
+
 ?>
 
 <body class="py-5">
@@ -61,36 +94,55 @@
                                 </thead>
                                 <tbody>
                                     <!-- List of uploaded files will be populated here you can delete it after implementing the backend logic -->
-                                    <!-- Dummy Data 1 -->
-                                    <tr>
-                                        <td class="ps-4 py-3 text-white">document_secret.pdf</td>
-                                        <td class="py-3 text-white-50">2.4 MB</td>
-                                        <td class="py-3 text-white-50">Sep 04, 2026</td>
-                                        <td class="text-end pe-4 py-3">
-                                            <a href="#" class="btn btn-sm btn-outline-info me-1">Download</a>
-                                            <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
-                                        </td>
-                                    </tr>
-                                    <!-- Dummy Data 2 -->
-                                    <tr>
-                                        <td class="ps-4 py-3 text-white">image_backup.png</td>
-                                        <td class="py-3 text-white-50">5.1 MB</td>
-                                        <td class="py-3 text-white-50">Sep 02, 2026</td>
-                                        <td class="text-end pe-4 py-3">
-                                            <a href="#" class="btn btn-sm btn-outline-info me-1">Download</a>
-                                            <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
-                                        </td>
-                                    </tr>
-                                    <!-- Dummy Data 3 -->
-                                    <tr>
-                                        <td class="ps-4 py-3 text-white">archive_data.zip</td>
-                                        <td class="py-3 text-white-50">128 MB</td>
-                                        <td class="py-3 text-white-50">Aug 28, 2026</td>
-                                        <td class="text-end pe-4 py-3">
-                                            <a href="#" class="btn btn-sm btn-outline-info me-1">Download</a>
-                                            <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
-                                        </td>
-                                    </tr>
+                                    <?php if ($file_count > 0): ?>
+
+                                        <?php while ($file = mysqli_fetch_assoc($result)): ?>
+
+                                            <tr>
+
+                                                <td class="ps-4 py-3 text-white">
+                                                    <?php echo htmlspecialchars($file["original_name"]); ?>
+                                                </td>
+
+                                                <td class="py-3 text-white-50">
+                                                    <?php
+                                                    echo round($file["file_size"] / 1024 / 1024, 2);
+                                                    ?>
+                                                    MB
+                                                </td>
+
+                                                <td class="py-3 text-white-50">
+                                                    <?php echo htmlspecialchars($file["uploaded_at"]); ?>
+                                                </td>
+
+                                                <td class="text-end pe-4 py-3">
+
+                                                    <a href="#" class="btn btn-sm btn-outline-info me-1">
+                                                        Download
+                                                    </a>
+
+                                                    <a href="#" class="btn btn-sm btn-outline-danger">
+                                                        Delete
+                                                    </a>
+
+                                                </td>
+
+                                            </tr>
+
+                                        <?php endwhile; ?>
+
+                                    <?php else: ?>
+
+                                <tr>
+
+                                    <td colspan="4" class="text-center py-4 text-white-50">
+                                        No files uploaded yet.
+                                    </td>
+
+                                </tr>
+
+                            <?php endif; ?>
+                            
                                 </tbody>
                             </table>
                         </div>
@@ -98,7 +150,9 @@
                 </div>
                 
                 <div class="text-center mt-4">
-                    <p class="text-white-50 small">Showing 3 files in your vault.</p>
+                    <p class="text-white-50 small">
+                        Showing <?php echo $file_count; ?> files in your vault.
+                    </p>
                 </div>
             </div>
         </div>

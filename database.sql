@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS `files` (
   `file_size` int(11) NOT NULL,
   `file_type` varchar(50) NOT NULL,
   `uploaded_at` timestamp DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

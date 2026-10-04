@@ -18,6 +18,22 @@
 // your mission in this file:
 // 1. Check session for user authentication if not authenticated redirect to login.php
 // 2. If authenticated display the following options: Upload File, View Uploads 
+
+session_start();
+
+// Check if user is authenticated
+if (!isset($_SESSION["user_id"])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Logout
+if (isset($_GET["logout"])) {
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
+
 ?>
 <body class="d-flex justify-content-center align-items-center vh-100">
     <div class="container d-flex justify-content-center">
@@ -29,6 +45,7 @@
                 <div class="d-grid gap-3">
                     <a href="upload.php" class="btn btn-primary btn-lg fw-medium">Upload File</a>
                     <a href="list.php" class="btn btn-outline-secondary text-white btn-lg fw-medium">View Uploads</a>
+                    <a href="index.php?logout=true" class="btn btn-outline-danger btn-lg fw-medium">Logout</a>
                 </div>
             </div>
         </div>

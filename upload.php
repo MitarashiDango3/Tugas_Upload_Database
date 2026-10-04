@@ -32,6 +32,20 @@
 // 1. Check session for user authentication if not authenticated redirect to login.php
 // 2. If authenticated display the upload form with a file input and a submit button
 // 3. The form should submit to doUpload.php using POST method and enctype="multipart/form-data"
+
+session_start();
+
+if (!isset($_SESSION["user_id"])) {
+    header("Location: login.php");
+    exit();
+}
+
+$error = "";
+
+if (isset($_GET["error"])) {
+    $error = $_GET["error"];
+}
+
 ?>
 <body class="d-flex justify-content-center align-items-center vh-100">
     <div class="container d-flex justify-content-center">
@@ -42,8 +56,16 @@
                     <a href="index.php" class="btn btn-sm btn-outline-secondary text-white">Back to Home</a>
                 </div>
                 <p class="text-white-50 mb-4">Select a file to securely store it in your vault.</p>
+
+                <?php if ($error != ""): ?>
+
+                    <div class="alert alert-danger">
+                        <?php echo htmlspecialchars($error); ?>
+                    </div>
+
+                <?php endif; ?>
                 
-                <form action="list.php" method="POST" enctype="multipart/form-data">
+                <form action="doUpload.php" method="POST" enctype="multipart/form-data">
                     <div class="mb-4">
                         <label for="fileUpload" class="form-label text-white-50 small mb-1">Choose File</label>
                         <input class="form-control" type="file" id="fileUpload" name="fileUpload" required>
